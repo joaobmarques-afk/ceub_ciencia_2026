@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Minijogos</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2c3e50;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            margin-top: 20px;
+            width: 400px;
+            height: 600px;
+            background-color: #34495e;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(44, 62, 80, 0.9);
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            text-align: center;
+            color: #ecf0f1;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 80%;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #score-display {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        #back-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 15px;
+            width: auto;
+            font-size: 14px;
+            background-color: #e74c3c;
+            z-index: 5;
+        }
+        
+        #back-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Telas de Interface -->
+        <div id="menu-screen" class="ui-layer">
+            <h1>Portal de Jogos</h1>
+            <button onclick="startGame('pong')">1. Pong Solo</button>
+            <button onclick="startGame('fuga')">2. Fuga de Blocos</button>
+            <button onclick="startGame('mira')">3. Treino de Mira</button>
+        </div>
+
+        <div id="gameover-screen" class="ui-layer hidden">
+            <h1>Fim de Jogo!</h1>
+            <p id="final-score">Pontos: 0</p>
+            <button onclick="restartGame()">Jogar Novamente</button>
+            <button onclick="showMenu()" style="background-color: #95a5a6;">Voltar ao Menu</button>
+        </div>
+
+        <!-- Elementos em Jogo -->
+        <div id="score-display" class="hidden">Pontos: <span id="score">0</span></div>
+        <button id="back-btn" class="hidden" onclick="showMenu()">Menu</button>
+        
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Elementos da UI
+        const menuScreen = document.getElementById('menu-screen');
+        const gameOverScreen = document.getElementById('gameover-screen');
+        const scoreDisplay = document.getElementById('score-display');
+        const scoreElement = document.getElementById('score');
+        const finalScoreElement = document.getElementById('final-score');
+        const backBtn = document.getElementById('back-btn');
+
+        // Estado Global
+        let currentGame = null; // 'pong', 'fuga', 'mira'
+        let isPlaying = false;
+        let score = 0;
+        let animationId;
+
+        // Inputs
+        let keys = { ArrowLeft: false, ArrowRight: false };
+        let mouse = { x: 0, y: 0, clicked: false };
+
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+        
+        canvas.addEventListener('mousedown', e => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+            mouse.clicked = true;
+        });
+
+        // ------------------ JOGO 1: PONG SOLO ------------------
+        const pong = {
+            paddle: { x: 150, y: 550, width: 100, height: 15, speed: 7 },
+            ball: { x: 200, y: 300, radius: 10, dx: 4, dy: -4, speedMult: 1 },
+            init() {
+                this.paddle.x = 150;
+                this.ball.x = 200; this.ball.y = 300;
+                this.ball.dx = (Math.random() > 0.5 ? 4 : -4);
+                this.ball.dy = -4;
+                this.ball.speedMult = 1;
+            },
+            update() {
+                // Movimento Paddle
+                if (keys.ArrowLeft && this.paddle.x > 0) this.paddle.x -= this.paddle.speed;
+                if (keys.ArrowRight && this.paddle.x + this.paddle.width < canvas.width) this.paddle.x += this.paddle.speed;
+
+                // Movimento Bola
+                this.ball.x += this.ball.dx * this.ball.speedMult;
+                this.ball.y += this.ball.dy * this.ball.speedMult;
+
+                // Colisão Paredes
+                if (this.ball.x - this.ball.radius < 0 || this.ball.x + this.ball.radius > canvas.width) this.ball.dx *= -1;
+                if (this.ball.y - this.ball.radius < 0) this.ball.dy *= -1;
+
+                // Colisão Paddle
+                if (this.ball.y + this.ball.radius > this.paddle.y && 
+                    this.ball.x > this.paddle.x && 
+                    this.ball.x < this.paddle.x + this.paddle.width) {
+                    this.ball.dy *= -1;
+                    this.ball.y = this.paddle.y - this.ball.radius; // evita ficar presa
+                    score += 10;
+                    this.ball.speedMult += 0.05; // aumenta dificuldade
+                }
+
+                // Game Over
+                if (this.ball.y - this.ball.radius > canvas.height) gameOver();
+            },
+            draw() {
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(this.paddle.x, this.paddle.y, this.paddle.width, this.paddle.height);
+                
+                ctx.beginPath();
+                ctx.arc(this.ball.x, this.ball.y, this.ball.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#f1c40f';
+                ctx.fill();
+                ctx.closePath();
+            }
+        };
+
+        // ------------------ JOGO 2: FUGA DE BLOCOS ------------------
+        const fuga = {
+            player: { x: 175, y: 500, size: 50, speed: 6 },
+            blocks: [],
+            frameCount: 0,
+            spawnRate: 60,
+            init() {
+                this.player.x = 175;
+                this.blocks = [];
+                this.frameCount = 0;
+                this.spawnRate = 60;
+            },
+            update() {
+                // Movimento
+                if (keys.ArrowLeft && this.player.x > 0) this.player.x -= this.player.speed;
+                if (keys.ArrowRight && this.player.x + this.player.size < canvas.width) this.player.x += this.player.speed;
+
+                // Gerar Blocos
+                this.frameCount++;
+                if (this.frameCount % this.spawnRate === 0) {
+                    const size = Math.random() * 40 + 20;
+                    this.blocks.push({
+                        x: Math.random() * (canvas.width - size),
+                        y: -size,
+                        size: size,
+                        speed: Math.random() * 3 + 2 + (score / 500)
+                    });
+                    if (this.spawnRate > 20) this.spawnRate--; // Fica mais difícil
+                }
+
+                // Atualizar Blocos e Pontuação
+                for (let i = this.blocks.length - 1; i >= 0; i--) {
+                    let b = this.blocks[i];
+                    b.y += b.speed;
+                    
+                    // Colisão
+                    if (this.player.x < b.x + b.size &&
+                        this.player.x + this.player.size > b.x &&
+                        this.player.y < b.y + b.size &&
+                        this.player.y + this.player.size > b.y) {
+                        gameOver();
+                    }
+
+                    // Remove os que passaram e dá pontos
+                    if (b.y > canvas.height) {
+                        this.blocks.splice(i, 1);
+                        score += 5;
+                    }
+                }
+            },
+            draw() {
+                ctx.fillStyle = '#3498db';
+                ctx.fillRect(this.player.x, this.player.y, this.player.size, this.player.size);
+
+                ctx.fillStyle = '#e74c3c';
+                this.blocks.forEach(b => {
+                    ctx.fillRect(b.x, b.y, b.size, b.size);
+                });
+            }
+        };
+
+        // ------------------ JOGO 3: TREINO DE MIRA ------------------
+        const mira = {
+            targets: [],
+            frameCount: 0,
+            init() {
+                this.targets = [];
+                this.frameCount = 0;
+            },
+            update() {
+                this.frameCount++;
+                
+                // Gera novo alvo
+                if (this.frameCount % 50 === 0 && this.targets.length < 5) {
+                    this.targets.push({
+                        x: Math.random() * 300 + 50,
+                        y: Math.random() * 400 + 100,
+                        radius: 20 + Math.random() * 15,
+                        life: 100 // Tempo até sumir
+                    });
+                }
+
+                // Clique nos alvos
+                if (mouse.clicked) {
+                    for (let i = this.targets.length - 1; i >= 0; i--) {
+                        let t = this.targets[i];
+                        let dist = Math.hypot(mouse.x - t.x, mouse.y - t.y);
+                        if (dist < t.radius) {
+                            this.targets.splice(i, 1);
+                            score += 15;
+                            break; // Acerta apenas 1 por clique
+                        }
+                    }
+                    mouse.clicked = false; // reseta clique
+                }
+
+                // Atualiza vida dos alvos
+                for (let i = this.targets.length - 1; i >= 0; i--) {
+                    this.targets[i].life--;
+                    if (this.targets[i].life <= 0) {
+                        gameOver(); // Se deixar um sumir, perde!
+                    }
+                }
+            },
+            draw() {
+                this.targets.forEach(t => {
+                    ctx.beginPath();
+                    ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(231, 76, 60, ${t.life / 100})`;
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#c0392b';
+                    ctx.stroke();
+                    ctx.closePath();
+                });
+            }
+        };
+
+        // ------------------ LÓGICA PRINCIPAL ------------------
+
+        function startGame(gameId) {
+            currentGame = gameId;
+            score = 0;
+            isPlaying = true;
+            
+            menuScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            scoreDisplay.classList.remove('hidden');
+            backBtn.classList.remove('hidden');
+
+            if (gameId === 'pong') pong.init();
+            if (gameId === 'fuga') fuga.init();
+            if (gameId === 'mira') mira.init();
+
+            cancelAnimationFrame(animationId);
+            gameLoop();
+        }
+
+        function restartGame() {
+            startGame(currentGame);
+        }
+
+        function showMenu() {
+            isPlaying = false;
+            cancelAnimationFrame(animationId);
+            
+            menuScreen.classList.remove('hidden');
+            gameOverScreen.classList.add('hidden');
+            scoreDisplay.classList.add('hidden');
+            backBtn.classList.add('hidden');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function gameOver() {
+            isPlaying = false;
+            finalScoreElement.innerText = `Pontos: ${score}`;
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        function gameLoop() {
+            if (!isPlaying) return;
+
+            // Limpa a tela
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Atualiza e desenha o jogo atual
+            if (currentGame === 'pong') {
+                pong.update();
+                pong.draw();
+            } else if (currentGame === 'fuga') {
+                fuga.update();
+                fuga.draw();
+            } else if (currentGame === 'mira') {
+                mira.update();
+                mira.draw();
+            }
+
+            // Atualiza placar visualmente
+            scoreElement.innerText = score;
+            mouse.clicked = false; // Garante que o clique não fique preso
+
+            if (isPlaying) {
+                animationId = requestAnimationFrame(gameLoop);
+            }
+        }
+    </script>
+</body>
+</html>
