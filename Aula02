@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<h1> <th>Formulário de matrícula</th></h1>
+<body>
+    <main>
+        <h3>Dados</h3>
+            <p>Nome do aluno </p><input type="" name="Nome do aluno"> 
+            <p>Nascimento</p><input type="" name="nascimento">
+            <p>Nome do pai</p><input type="" name="Nome do pai">
+            <p>Nome da Mãe</p><input type="" name="Nome do mae">
+            <p>Telefone</p><input type="" name="Telefone DDD" >            <p>Tel</p><input type="" name="Tel">            <p>Ramal</p><input type="" name="Ramal">
+            <p>Email</p><input type="" name="Email"> 
+
+            <h2>Informações de Matrícula</h2>
+            <p>Série</p><select name="Série" id=""></select>
+            <input type="radio"> <input type="radio">
+            <input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox"><input type="checkbox">
+            <button>Enviar formulario</button>
+            <button>limpar Campos</button>
+    </main>
+
+
+    
+</body>
+</html>     
