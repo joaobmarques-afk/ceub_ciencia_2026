@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Escola Virtual - Pré-Matrícula</title>
+<style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body{
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      background-color: lavender;
+      color: black;
+      min-height: 100vh;
+    }
+
+    h1{
+      background-color: midnightblue;
+      color: white;
+      text-align: center;
+      padding: 30px 20px;
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+
+    h2{
+      text-align: center;
+      color: darkslategrey;
+      margin: 40px 0 30px;
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+
+    form{
+      width: 90%;
+      max-width: 960px;
+      margin: 0 auto 60px auto;
+      background-color: white;
+      padding: 50px 60px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    }
+
+    fieldset{
+        border: 2px solid #1a1a1a;
+        border-radius: 8px;
+        padding: 30px 35px;
+        margin-bottom: 35px;
+    }
+
+    legend{
+        background-color: #1a1a1a;
+        color: white;
+        padding: 7px 18px;
+        border-radius: 5px;
+        font-size: 15px;
+        letter-spacing: 1px;
+    }
+
+    .campo-grupo{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px 40px;
+        margin-bottom: 20px;
+    }
+
+    .campo{
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 20px;    
+    }
+
+    label{
+        display: inline-block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: darkblue;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    input[type='text'],
+    input[type='date'],
+    input[type='email']{
+        padding: 10px 14px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 15px;
+        background-color: #fafafa;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .campo input[type='text']
+    .campo input[type='date']
+    .campo input[type='email']{
+        width: 100%;
+    }
+
+    input[type='text']:focus {
+        border-color: #1a1a1a;
+        box-shadow: 0 0 0 3px rgba(red, green, blue, alpha);
+    }
+
+    select{
+        padding: 10px 14px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 15px;
+        background-color: #fafafa;
+        cursor: pointer;
+        width: 100% ;
+        transition: border-color 0.3s   ;
+    }
+
+    input[type='submit']{
+        background-color: greenyellow;
+    }
+
+    input[type='reset']{
+        background-color: red;
+    }
+
+  </style>
+</head>
+<body>
+    <h1 align="center">Escola Virtual</h1>
+    <h2 align="center">Formulário de Pré-Matrícula</h2>
+
+    <form action="#" method="post">
+        <table border="1" width="80%" align="center" cellspacing="0" cellpadding="10">
+            <tr>
+                <td>
+                    <b>Dados Pessoais:</b>
+                    <table width="100%" cellpadding="3">
+                        <tr>
+                            <td align="right" width="30%">Nome do Aluno:</td>
+                            <td><input type="text" name="nome_aluno" size="60"></td>
+                        </tr>
+                        <tr>
+                            <td align="right">Nascimento (dd/mm/aaaa):</td>
+                            <td>
+                                <input type="text" name="dia" size="2" maxlength="2"> /
+                                <input type="text" name="mes" size="2" maxlength="2"> /
+                                <input type="text" name="ano" size="4" maxlength="4">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">Nome da Mãe:</td>
+                            <td><input type="text" name="nome_mae" size="60"></td>
+                        </tr>
+                        <tr>
+                            <td align="right">Nome do Pai:</td>
+                            <td><input type="text" name="nome_pai" size="60"></td>
+                        </tr>
+                        <tr>
+                            <td align="right">Telefone:</td>
+                            <td>
+                                DDD ( <input type="text" name="ddd" size="2" maxlength="2"> )
+                                Tel: <input type="text" name="telefone" size="15">
+                                Ramal: <input type="text" name="ramal" size="5">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">E-Mail:</td>
+                            <td><input type="text" name="email" size="60"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <b>Informações de Matrícula:</b>
+                    <table width="100%" cellpadding="5">
+                        <tr valign="top">
+                            <td width="33%">
+                                Série:<br>
+                                <select name="serie">
+                                    <option value="pre-escolar">pré-escolar</option>
+                                </select>
+                            </td>
+                            <td width="33%">
+                                Turno:<br>
+                                <input type="radio" name="turno" value="manha" id="manha"> <label for="manha">Manhã</label><br>
+                                <input type="radio" name="turno" value="tarde" id="tarde"> <label for="tarde">Tarde</label>
+                            </td>
+                            <td width="33%">
+                                Atividades Extracurriculares:<br>
+                                <input type="checkbox" name="atividade" value="informatica"> Informática<br>
+                                <input type="checkbox" name="atividade" value="musica"> Música<br>
+                                <input type="checkbox" name="atividade" value="balet"> Balet<br>
+                                <input type="checkbox" name="atividade" value="pintura"> Pintura<br>
+                                <input type="checkbox" name="atividade" value="judo"> Judô<br>
+                                <input type="checkbox" name="atividade" value="futebol"> Futebol
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        
+        <br>
+        <div align="center">
+            <input type="submit" value="Envia Formulário">
+            <input type="reset" value="Limpa Campos">
+        </div>
+    </form>
+</body>
+</html>
